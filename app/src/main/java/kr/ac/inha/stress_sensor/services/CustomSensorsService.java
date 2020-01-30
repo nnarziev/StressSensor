@@ -68,7 +68,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
     public static final short APP_USAGE_SEND_PERIOD = 30;  //in sec
     public static final short DATA_SUBMIT_PERIOD = 5;  //in min
     private static final short LIGHT_SENSOR_READ_PERIOD = 5 * 60;  //in sec
-    private static final short AUDIO_RECORDING_PERIOD = 5 * 60;  //in sec
+    private static final short AUDIO_RECORDING_PERIOD = 20 * 60;  //in sec
     private static final int ACTIVITY_RECOGNITION_INTERVAL = 60; //in sec
 
 
@@ -146,7 +146,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
             //endregion
 
             //region Registering ACC sensor periodically
-            int nowHour = curCal.get(Calendar.HOUR_OF_DAY);
+            /*int nowHour = curCal.get(Calendar.HOUR_OF_DAY);
             if (6 <= nowHour && nowHour < 22)  // register ACC only between 06.00 and 22.00
             {
                 int nowMinutes = curCal.get(Calendar.MINUTE);
@@ -159,7 +159,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
                     mSensorManager.unregisterListener(CustomSensorsService.this, sensorAcc);
                     isAccelerometerSensing = false;
                 }
-            }
+            }*/
             //endregion
 
             //region Registering Light sensor periodically
@@ -202,7 +202,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
                         }
                     }
                 };
-                timer.schedule(task, 20 * 1000);  // unregister Audio record after 200 ms
+                timer.schedule(task, 20 * 1000);  // unregister Audio record after 20 sec
 
                 if (!isAudioRecording) {
                     audioFeatureRecorder.start();
@@ -453,10 +453,11 @@ public class CustomSensorsService extends Service implements SensorEventListener
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        /*if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             String value = System.currentTimeMillis() + " " + event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + Tools.getEMAOrderFromRangeBeforeEMA(System.currentTimeMillis());
             db.insertSensorData(DATA_SRC_ACC, value);
-        } else if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
+        } else*/
+        if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
             db.insertSensorData(DATA_SRC_STEP_DETECTOR, System.currentTimeMillis() + " " + Tools.getEMAOrderFromRangeBeforeEMA(System.currentTimeMillis()));
         } else if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
             String value = System.currentTimeMillis() + " " + event.values[0] + " " + Tools.getEMAOrderFromRangeBeforeEMA(System.currentTimeMillis());
