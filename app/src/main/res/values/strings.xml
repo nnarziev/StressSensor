@@ -14,7 +14,7 @@
     <string name="url_audio_submit">http://%1$s/submit_audio</string>
     <string name="url_location_submit">http://%1$s/sensor_data/locations_submit</string>
 
-    <string name="app_name">MF+PS</string>
+    <string name="app_name">StressSensor</string>
     <string name="ConnectionEstablishedMsg">Connection established</string>
     <string name="ConnectionTerminateddMsg">Connection terminated</string>
     <string name="ConnectionAlreadyExist">Already connected</string>
