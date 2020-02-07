@@ -313,7 +313,9 @@ public class CustomSensorsService extends Service implements SensorEventListener
 
     private Runnable HeartBeatSendRunnable = new Runnable() {
         public void run() {
-            Tools.sendHeartbeat(CustomSensorsService.this);
+            if (!Tools.sendHeartbeat(CustomSensorsService.this))
+                Tools.perform_logout(CustomSensorsService.this);
+            stopSelf();
         }
     };
 

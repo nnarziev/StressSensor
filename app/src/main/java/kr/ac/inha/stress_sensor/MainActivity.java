@@ -122,7 +122,11 @@ public class MainActivity extends Activity {
             @Override
             public void onRefresh() {
                 updateStats();
-                Tools.sendHeartbeat(getApplicationContext());
+                if (!Tools.sendHeartbeat(getApplicationContext())) {
+                    Tools.perform_logout(MainActivity.this);
+                    stopService(customSensorsService);
+                    finish();
+                }
                 pullToRefresh.setRefreshing(false);
             }
         });
@@ -145,6 +149,13 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (!Tools.sendHeartbeat(getApplicationContext())) {
+            Tools.perform_logout(MainActivity.this);
+            stopService(customSensorsService);
+            finish();
+        }
+
         loginPrefs = getSharedPreferences("UserLogin", MODE_PRIVATE);
         locationPrefs = getSharedPreferences("UserLocations", MODE_PRIVATE);
 
@@ -490,20 +501,7 @@ public class MainActivity extends Activity {
     }
 
     public void logoutClick(MenuItem item) {
-
-        SharedPreferences.Editor editorLocation = locationPrefs.edit();
-        editorLocation.clear();
-        editorLocation.apply();
-
-        SharedPreferences.Editor editorLogin = loginPrefs.edit();
-        editorLogin.remove("username");
-        editorLogin.remove("password");
-        editorLogin.putBoolean("logged_in", false);
-        editorLogin.remove("ema_btn_make_visible");
-        editorLogin.clear();
-        editorLogin.apply();
-
-        GeofenceHelper.removeAllGeofences(this);
+        Tools.perform_logout(this);
         stopService(customSensorsService);
         finish();
     }

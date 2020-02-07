@@ -485,9 +485,10 @@ public class Tools {
         return false;
     }
 
-    public static synchronized void sendHeartbeat(Context con) {
+    public static synchronized boolean sendHeartbeat(Context con) {
 
         final SharedPreferences loginPrefs = con.getSharedPreferences("UserLogin", MODE_PRIVATE);
+        final boolean[] result = {true};
 
         if (Tools.isNetworkAvailable(con)) {
 
@@ -515,6 +516,7 @@ public class Tools {
                                 break;
                             case Tools.RES_FAIL:
                                 Thread.sleep(2000);
+                                result[0] = false;
                                 Log.e("sendHeartbeat", "Failed to report");
                                 break;
                             case Tools.RES_SRV_ERR:
@@ -531,6 +533,8 @@ public class Tools {
                 }
             });
         }
+
+        return result[0];
 
     }
 
@@ -601,6 +605,26 @@ public class Tools {
             ema_order = 6;
 
         return ema_order;
+    }
+
+    public static void perform_logout(Context con) {
+
+        SharedPreferences loginPrefs = con.getSharedPreferences("UserLogin", MODE_PRIVATE);
+        SharedPreferences locationPrefs = con.getSharedPreferences("UserLocations", MODE_PRIVATE);
+
+        SharedPreferences.Editor editorLocation = locationPrefs.edit();
+        editorLocation.clear();
+        editorLocation.apply();
+
+        SharedPreferences.Editor editorLogin = loginPrefs.edit();
+        editorLogin.remove("username");
+        editorLogin.remove("password");
+        editorLogin.putBoolean("logged_in", false);
+        editorLogin.remove("ema_btn_make_visible");
+        editorLogin.clear();
+        editorLogin.apply();
+
+        GeofenceHelper.removeAllGeofences(con);
     }
 }
 
