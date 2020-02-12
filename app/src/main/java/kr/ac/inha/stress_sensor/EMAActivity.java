@@ -37,10 +37,10 @@ public class EMAActivity extends AppCompatActivity {
     TextView question3;
     TextView question4;
 
-    SeekBar answer1;
-    SeekBar answer2;
-    SeekBar answer3;
-    SeekBar answer4;
+    SeekBar seekBar1;
+    SeekBar seekBar2;
+    SeekBar seekBar3;
+    SeekBar seekBar4;
 
     Button btnSubmit;
     //endregion
@@ -68,10 +68,10 @@ public class EMAActivity extends AppCompatActivity {
         question3 = findViewById(R.id.question3);
         question4 = findViewById(R.id.question4);
 
-        answer1 = findViewById(R.id.scale_q1);
-        answer2 = findViewById(R.id.scale_q2);
-        answer3 = findViewById(R.id.scale_q3);
-        answer4 = findViewById(R.id.scale_q4);
+        seekBar1 = findViewById(R.id.scale_q1);
+        seekBar2 = findViewById(R.id.scale_q2);
+        seekBar3 = findViewById(R.id.scale_q3);
+        seekBar4 = findViewById(R.id.scale_q4);
 
         btnSubmit = findViewById(R.id.btn_submit);
 
@@ -86,13 +86,56 @@ public class EMAActivity extends AppCompatActivity {
 
         long timestamp = System.currentTimeMillis();
 
+        int answer1 = seekBar1.getProgress() + 1;
+        int answer2 = seekBar2.getProgress() + 1;
+        int answer3 = 5;
+        int answer4 = 5;
+        switch (seekBar3.getProgress() + 1) {
+            case 1:
+                answer3 = 5;
+                break;
+            case 2:
+                answer3 = 4;
+                break;
+            case 3:
+                answer3 = 3;
+                break;
+            case 4:
+                answer3 = 2;
+                break;
+            case 5:
+                answer3 = 1;
+                break;
+        }
+        switch (seekBar4.getProgress() + 1) {
+            case 1:
+                answer4 = 5;
+                break;
+            case 2:
+                answer4 = 4;
+                break;
+            case 3:
+                answer4 = 3;
+                break;
+            case 4:
+                answer4 = 2;
+                break;
+            case 5:
+                answer4 = 1;
+                break;
+        }
+
         if (Tools.isNetworkAvailable(this))
             Tools.execute(new MyRunnable(
                     this,
                     getString(R.string.url_ema_submit, getString(R.string.server_ip)),
                     loginPrefs.getString(SignInActivity.user_id, null),
                     loginPrefs.getString(SignInActivity.password, null),
-                    timestamp
+                    timestamp,
+                    answer1,
+                    answer2,
+                    answer3,
+                    answer4
             ) {
                 @Override
                 public void run() {
@@ -100,18 +143,21 @@ public class EMAActivity extends AppCompatActivity {
                     String email = (String) args[1];
                     String password = (String) args[2];
                     long timestamp = (long) args[3];
+                    int ans1 = (int) args[4];
+                    int ans2 = (int) args[5];
+                    int ans3 = (int) args[6];
+                    int ans4 = (int) args[7];
                     try {
                         JSONObject body = new JSONObject();
                         body.put("username", email);
                         body.put("password", password);
                         body.put("ema_timestamp", timestamp);
                         body.put("ema_order", emaOrder);
-                        Log.e(TAG, "EMA order 3: " + emaOrder);
                         String answers = String.format(Locale.US, "%d %d %d %d",
-                                answer1.getProgress() + 1,
-                                answer2.getProgress() + 1,
-                                answer3.getProgress() + 1,
-                                answer4.getProgress() + 1);
+                                ans1,
+                                ans2,
+                                ans3,
+                                ans4);
                         body.put("answers", answers);
 
                         Log.e(TAG, "EMA: " + body.toString());
@@ -162,10 +208,10 @@ public class EMAActivity extends AppCompatActivity {
         else {
             Log.d(TAG, "No connection case");
             String answers = String.format(Locale.US, "%d %d %d %d",
-                    answer1.getProgress() + 1,
-                    answer2.getProgress() + 1,
-                    answer3.getProgress() + 1,
-                    answer4.getProgress() + 1);
+                    answer1,
+                    answer2,
+                    answer3,
+                    answer4);
 
             boolean isInserted = db.insertEMAData(emaOrder, timestamp, answers);
             if (isInserted) {
