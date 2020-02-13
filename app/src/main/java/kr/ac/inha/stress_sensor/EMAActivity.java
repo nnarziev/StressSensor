@@ -86,42 +86,42 @@ public class EMAActivity extends AppCompatActivity {
 
         long timestamp = System.currentTimeMillis();
 
-        int answer1 = seekBar1.getProgress() + 1;
-        int answer2 = seekBar2.getProgress() + 1;
-        int answer3 = 5;
-        int answer4 = 5;
-        switch (seekBar3.getProgress() + 1) {
-            case 1:
-                answer3 = 5;
-                break;
-            case 2:
+        int answer1 = seekBar1.getProgress();
+        int answer2 = seekBar2.getProgress();
+        int answer3 = 4;
+        int answer4 = 4;
+        switch (seekBar3.getProgress()) {
+            case 0:
                 answer3 = 4;
                 break;
-            case 3:
+            case 1:
                 answer3 = 3;
                 break;
-            case 4:
+            case 2:
                 answer3 = 2;
                 break;
-            case 5:
+            case 3:
                 answer3 = 1;
                 break;
-        }
-        switch (seekBar4.getProgress() + 1) {
-            case 1:
-                answer4 = 5;
+            case 4:
+                answer3 = 0;
                 break;
-            case 2:
+        }
+        switch (seekBar4.getProgress()) {
+            case 0:
                 answer4 = 4;
                 break;
-            case 3:
+            case 1:
                 answer4 = 3;
                 break;
-            case 4:
+            case 2:
                 answer4 = 2;
                 break;
-            case 5:
+            case 3:
                 answer4 = 1;
+                break;
+            case 4:
+                answer4 = 0;
                 break;
         }
 

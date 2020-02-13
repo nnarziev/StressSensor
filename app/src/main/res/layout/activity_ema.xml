@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitXY"
-            android:src="@drawable/seekbar_numbers1"
+            android:src="@drawable/seekbar_numbers"
             tools:ignore="ContentDescription" />
 
         <View
@@ -81,7 +81,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitXY"
-            android:src="@drawable/seekbar_numbers1"
+            android:src="@drawable/seekbar_numbers"
             tools:ignore="ContentDescription" />
 
 
@@ -112,7 +112,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitXY"
-            android:src="@drawable/seekbar_numbers1"
+            android:src="@drawable/seekbar_numbers"
             tools:ignore="ContentDescription" />
 
 
@@ -143,7 +143,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitXY"
-            android:src="@drawable/seekbar_numbers1"
+            android:src="@drawable/seekbar_numbers"
             tools:ignore="ContentDescription" />
 
         <View
