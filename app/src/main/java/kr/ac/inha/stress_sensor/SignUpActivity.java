@@ -134,8 +134,8 @@ public class SignUpActivity extends Activity {
                 usrID != null &&
                 phoneNum != null &&
                 password != null &&
-                password.length() >= 6 &&
-                password.length() <= 16 &&
+                /*password.length() >= 6 &&
+                password.length() <= 16 &&*/
                 password.equals(confirmPass);
     }
 }

@@ -39,7 +39,7 @@
     <string name="button_start_sensors">start sensors</string>
     <string name="button_stop_sensors">stop sensors</string>
     <string name="sign_in">로그인</string>
-    <string name="username">Username</string>
+    <string name="username">ID</string>
     <string name="name">Name</string>
     <string name="password">Password</string>
     <string name="not_a_member_yet">아직 회원이 아니신가요?</string>
