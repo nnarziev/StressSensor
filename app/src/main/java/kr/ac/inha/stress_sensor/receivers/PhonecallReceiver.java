@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 
+import kr.ac.inha.stress_sensor.services.AudioFeatureRecorder;
+
 public abstract class PhonecallReceiver extends BroadcastReceiver {
 
     //The receiver will be recreated whenever android feels like it.  We need a static variable to remember data between instantiations
@@ -14,10 +16,8 @@ public abstract class PhonecallReceiver extends BroadcastReceiver {
     private static boolean isIncoming;
     private static String savedNumber;  //because the passed incoming is only valid in ringing
 
-
     @Override
     public void onReceive(Context context, Intent intent) {
-
         //We listen to two intents.  The new outgoing call only tells us of an outgoing call.  We use it to get the number.
         if (intent.getAction().equals("android.intent.action.NEW_OUTGOING_CALL")) {
             savedNumber = intent.getExtras().getString("android.intent.extra.PHONE_NUMBER");

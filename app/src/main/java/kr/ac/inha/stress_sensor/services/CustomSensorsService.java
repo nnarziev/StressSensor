@@ -39,8 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -55,20 +53,23 @@ import kr.ac.inha.stress_sensor.receivers.ActivityRecognitionReceiver;
 import kr.ac.inha.stress_sensor.receivers.CallReceiver;
 import kr.ac.inha.stress_sensor.receivers.ScreenAndUnlockReceiver;
 
+import static kr.ac.inha.stress_sensor.receivers.CallReceiver.AudioRunningForCall;
+
 public class CustomSensorsService extends Service implements SensorEventListener {
     private static final String TAG = "CustomSensorsService";
 
     //region Constants
     private static final int ID_SERVICE = 101;
     public static final int EMA_NOTIFICATION_ID = 1234; //in sec
-    public static final long EMA_NOTIF_EXPIRE = 3600;  //in sec
-    public static final int EMA_BTN_VISIBLE_X_MIN_AFTER_EMA = 60; //min
+    public static final long EMA_RESPONSE_EXPIRE_TIME = 3600;  //in sec
     public static final int SERVICE_START_X_MIN_BEFORE_EMA = 3 * 60; //min
     public static final short HEARTBEAT_PERIOD = 5;  //in min
     public static final short APP_USAGE_SEND_PERIOD = 30;  //in sec
     public static final short DATA_SUBMIT_PERIOD = 5;  //in min
     private static final short LIGHT_SENSOR_READ_PERIOD = 5 * 60;  //in sec
+    private static final short LIGHT_SENSOR_READ_DURATION = 5;  //in sec
     private static final short AUDIO_RECORDING_PERIOD = 20 * 60;  //in sec
+    private static final short AUDIO_RECORDING_DURATION = 20;  //in sec
     private static final int ACTIVITY_RECOGNITION_INTERVAL = 60; //in sec
 
 
@@ -93,13 +94,12 @@ public class CustomSensorsService extends Service implements SensorEventListener
     //endregion
 
     DatabaseHelper db;
+    SharedPreferences loginPrefs;
 
     long prevLightSensorReadingTime = 0;
-    long prevAudioRecordedTime = 0;
+    long prevAudioRecordStartTime = 0;
 
     static boolean isAccelerometerSensing = false;
-    static boolean isLightSensing = false;
-    static boolean isAudioRecording = false;
 
     //private StationaryDetector mStationaryDetector;
     NotificationManager mNotificationManager;
@@ -111,8 +111,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
     private ScreenAndUnlockReceiver mPhoneUnlockedReceiver;
     private CallReceiver mCallReceiver;
 
-    //private AudioRecorder audioRecorder;
-    private AudioFeatureRecorder audioFeatureRecorder;
+    public static AudioFeatureRecorder audioFeatureRecorder;
 
     private ActivityRecognitionClient activityRecognitionClient;
     private PendingIntent activityRecPendingIntent;
@@ -138,6 +137,9 @@ public class CustomSensorsService extends Service implements SensorEventListener
             if (ema_order != 0 && canSendNotif) {
                 Log.e(TAG, "EMA order 1: " + ema_order);
                 sendNotification(ema_order);
+                SharedPreferences.Editor editor = loginPrefs.edit();
+                editor.putBoolean("ema_btn_make_visible", true);
+                editor.apply();
                 canSendNotif = false;
             }
 
@@ -164,104 +166,37 @@ public class CustomSensorsService extends Service implements SensorEventListener
 
             //region Registering Light sensor periodically
             boolean canLightSense = curTimestamp > prevLightSensorReadingTime + LIGHT_SENSOR_READ_PERIOD * 1000;
+            boolean stopLightSensor = curTimestamp > prevLightSensorReadingTime + LIGHT_SENSOR_READ_DURATION * 1000;
             if (canLightSense) {
-                Timer timer = new Timer();
-                TimerTask task = new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (isLightSensing)
-                            if (sensorLight != null) {
-                                mSensorManager.unregisterListener(CustomSensorsService.this, sensorLight);
-                                isLightSensing = false;
-                            }
-                    }
-                };
-                timer.schedule(task, 1000);     // unregister Light sensor after 2000 ms
-
-                if (!isLightSensing) {
-                    if (sensorLight != null) {
-                        mSensorManager.registerListener(CustomSensorsService.this, sensorLight, SensorManager.SENSOR_DELAY_NORMAL);
-                        prevLightSensorReadingTime = curTimestamp;
-                        isLightSensing = true;
-                    }
+                if (sensorLight == null) {
+                    sensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+                    mSensorManager.registerListener(CustomSensorsService.this, sensorLight, SensorManager.SENSOR_DELAY_NORMAL);
+                    prevLightSensorReadingTime = curTimestamp;
+                }
+            } else if (stopLightSensor) {
+                if (sensorLight != null) {
+                    mSensorManager.unregisterListener(CustomSensorsService.this, sensorLight);
+                    sensorLight = null;
                 }
             }
             //endregion
 
             //region Registering Audio recorder periodically
-            boolean canRecord = curTimestamp > prevAudioRecordedTime + AUDIO_RECORDING_PERIOD * 1000;
-            if (canRecord) {
-                audioFeatureRecorder = new AudioFeatureRecorder(CustomSensorsService.this);
-                Timer timer = new Timer();
-                TimerTask task = new TimerTask() {
-                    @Override
-                    public void run() {
-                        if (isAudioRecording) {
-                            audioFeatureRecorder.stop();
-                            isAudioRecording = false;
-                        }
-                    }
-                };
-                timer.schedule(task, 20 * 1000);  // unregister Audio record after 20 sec
-
-                if (!isAudioRecording) {
+            boolean canStartAudioRecord = (curTimestamp > prevAudioRecordStartTime + AUDIO_RECORDING_PERIOD * 1000) || AudioRunningForCall;
+            boolean stopAudioRecord = (curTimestamp > prevAudioRecordStartTime + AUDIO_RECORDING_DURATION * 1000);
+            if (canStartAudioRecord) {
+                if (audioFeatureRecorder == null) {
+                    audioFeatureRecorder = new AudioFeatureRecorder(CustomSensorsService.this);
                     audioFeatureRecorder.start();
-                    prevAudioRecordedTime = curTimestamp;
-                    isAudioRecording = true;
+                    prevAudioRecordStartTime = curTimestamp;
+                }
+            } else if (stopAudioRecord) {
+                if (audioFeatureRecorder != null) {
+                    audioFeatureRecorder.stop();
+                    audioFeatureRecorder = null;
                 }
             }
             //endregion
-
-            /*
-            //check the current time in desired range or not
-            Calendar now = Calendar.getInstance();
-            if (!isAccelerometerSensing && Tools.checkIfInEMARange(curCal)) {
-                //region Register Acc sensor
-                if (sensorAcc != null)
-                    mSensorManager.registerListener(CustomSensorsService.this, sensorAcc, SensorManager.SENSOR_DELAY_GAME);
-                else
-                    Log.e(TAG, "Sensor ACC is NOT available");
-                //endregion
-                isAccelerometerSensing = true;
-
-                //region Starting voice recording
-                // TODO: start audio here
-                audioRecorder = new AudioRecorder(String.format(Locale.getDefault(), "%s/%d.mp4", getCacheDir(), System.currentTimeMillis()));
-                try {
-                    audioRecorder.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, "Audio couldn't be recorded!");
-                }
-                //endregion
-            } else if (isAccelerometerSensing && !Tools.checkIfInEMARange(curCal)) {
-                if (sensorAcc != null)
-                    mSensorManager.unregisterListener(CustomSensorsService.this, sensorAcc);
-                isAccelerometerSensing = false;
-
-                //region Stopping voice recording
-                // TODO: end audio here
-                if (audioRecorder != null && audioRecorder.isRecording()) {
-                    audioRecorder.stop();
-                    Tools.execute(new MyRunnable(null) {
-                        @Override
-                        public void run() {
-                            try {
-                                Tools.postFiles(getString(R.string.url_audio_submit,
-                                        getString(R.string.server_ip)),
-                                        Tools.loginPrefs.getString(SignInActivity.user_id, null),
-                                        Tools.loginPrefs.getString(SignInActivity.password, null),
-                                        new File(audioRecorder.getPath()));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Log.e(TAG, String.format(Locale.getDefault(), "Couldn't process audio file %s", audioRecorder.getPath()));
-                            }
-                        }
-                    });
-                }
-                //endregion
-            }
-            */
 
             mHandler.postDelayed(this, 2 * 1000);
         }
@@ -313,7 +248,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
 
     private Runnable HeartBeatSendRunnable = new Runnable() {
         public void run() {
-            if (!Tools.sendHeartbeat(CustomSensorsService.this)){
+            if (!Tools.sendHeartbeat(CustomSensorsService.this)) {
                 Tools.perform_logout(CustomSensorsService.this);
                 stopSelf();
             }
@@ -324,6 +259,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
     public void onCreate() {
         super.onCreate();
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+       loginPrefs = this.getSharedPreferences("UserLogin", MODE_PRIVATE);
         db = new DatabaseHelper(this);
 
         activityRecognitionClient = ActivityRecognition.getClient(getApplicationContext());
@@ -359,9 +295,8 @@ public class CustomSensorsService extends Service implements SensorEventListener
                 });
 
         isAccelerometerSensing = false;
-        isLightSensing = false;
 
-        sensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        //sensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
 
         sensorAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -511,7 +446,7 @@ public class CustomSensorsService extends Service implements SensorEventListener
         String channelId = this.getString(R.string.notif_channel_id);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this.getApplicationContext(), channelId);
         builder.setContentTitle(this.getString(R.string.app_name))
-                .setTimeoutAfter(1000 * EMA_NOTIF_EXPIRE)
+                .setTimeoutAfter(1000 * EMA_RESPONSE_EXPIRE_TIME)
                 .setContentText(this.getString(R.string.daily_notif_text))
                 .setTicker("New Message Alert!")
                 .setAutoCancel(true)
@@ -527,11 +462,6 @@ public class CustomSensorsService extends Service implements SensorEventListener
 
         final Notification notification = builder.build();
         notificationManager.notify(EMA_NOTIFICATION_ID, notification);
-
-        final SharedPreferences loginPrefs = this.getSharedPreferences("UserLogin", MODE_PRIVATE);
-        SharedPreferences.Editor editor = loginPrefs.edit();
-        editor.putBoolean("ema_btn_make_visible", true);
-        editor.apply();
 
         Intent gpsIntent = new Intent(this, SendGPSStats.class);
         gpsIntent.putExtra("ema_order", ema_order);

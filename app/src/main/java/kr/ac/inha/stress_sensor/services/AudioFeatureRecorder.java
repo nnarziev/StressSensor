@@ -16,7 +16,7 @@ import kr.ac.inha.stress_sensor.Tools;
 
 import static kr.ac.inha.stress_sensor.services.CustomSensorsService.DATA_SRC_AUDIO_LOUDNESS;
 
-class AudioFeatureRecorder {
+public class AudioFeatureRecorder {
     // region Constants
     public static final String TAG = "AudioFeatureRecorder";
     private final int SAMPLING_RATE = 11025;
@@ -31,7 +31,7 @@ class AudioFeatureRecorder {
     private DatabaseHelper db;
     // endregion
 
-    AudioFeatureRecorder(Context con) {
+    public AudioFeatureRecorder(Context con) {
         db = new DatabaseHelper(con);
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(SAMPLING_RATE, AUDIO_BUFFER_SIZE, 512);
         final SilenceDetector silenceDetector = new SilenceDetector(SILENCE_THRESHOLD, false);
@@ -59,13 +59,13 @@ class AudioFeatureRecorder {
         dispatcher.addAudioProcessor(mainAudioProcessor);
     }
 
-    void start() {
+    public void start() {
         Log.d(TAG, "Started: AudioRecorder");
         executor.execute(dispatcher);
         started = true;
     }
 
-    void stop() {
+    public void stop() {
         Log.d(TAG, "Stopped: AudioRecorder");
         if (started) {
             dispatcher.stop();

@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
@@ -73,7 +74,7 @@ import static android.content.Context.MODE_PRIVATE;
 import static kr.ac.inha.stress_sensor.EMAActivity.EMA_NOTIF_HOURS;
 import static kr.ac.inha.stress_sensor.MainActivity.PERMISSIONS;
 import static kr.ac.inha.stress_sensor.MainActivity.PERMISSION_ALL;
-import static kr.ac.inha.stress_sensor.services.CustomSensorsService.EMA_BTN_VISIBLE_X_MIN_AFTER_EMA;
+import static kr.ac.inha.stress_sensor.services.CustomSensorsService.EMA_RESPONSE_EXPIRE_TIME;
 import static kr.ac.inha.stress_sensor.services.CustomSensorsService.SERVICE_START_X_MIN_BEFORE_EMA;
 
 public class Tools {
@@ -588,20 +589,21 @@ public class Tools {
         return ema_order;
     }
 
+
     static short getEMAOrderFromRangeAfterEMA(Calendar cal) {
         short ema_order = 0;
         long t = (cal.get(Calendar.HOUR_OF_DAY) * 3600 + cal.get(Calendar.MINUTE) * 60 + cal.get(Calendar.SECOND)) * 1000;
-        if (EMAActivity.EMA_NOTIF_MILLIS[0] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[0] + EMA_BTN_VISIBLE_X_MIN_AFTER_EMA * 60 * 1000)
+        if (EMAActivity.EMA_NOTIF_MILLIS[0] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[0] + EMA_RESPONSE_EXPIRE_TIME * 1000)
             ema_order = 1;
-        else if (EMAActivity.EMA_NOTIF_MILLIS[1] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[1] + EMA_BTN_VISIBLE_X_MIN_AFTER_EMA * 60 * 1000)
+        else if (EMAActivity.EMA_NOTIF_MILLIS[1] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[1] + EMA_RESPONSE_EXPIRE_TIME * 1000)
             ema_order = 2;
-        else if (EMAActivity.EMA_NOTIF_MILLIS[2] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[2] + EMA_BTN_VISIBLE_X_MIN_AFTER_EMA * 60 * 1000)
+        else if (EMAActivity.EMA_NOTIF_MILLIS[2] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[2] + EMA_RESPONSE_EXPIRE_TIME * 1000)
             ema_order = 3;
-        else if (EMAActivity.EMA_NOTIF_MILLIS[3] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[3] + EMA_BTN_VISIBLE_X_MIN_AFTER_EMA * 60 * 1000)
+        else if (EMAActivity.EMA_NOTIF_MILLIS[3] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[3] + EMA_RESPONSE_EXPIRE_TIME * 1000)
             ema_order = 4;
-        else if (EMAActivity.EMA_NOTIF_MILLIS[4] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[4] + EMA_BTN_VISIBLE_X_MIN_AFTER_EMA * 60 * 1000)
+        else if (EMAActivity.EMA_NOTIF_MILLIS[4] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[4] + EMA_RESPONSE_EXPIRE_TIME * 1000)
             ema_order = 5;
-        else if (EMAActivity.EMA_NOTIF_MILLIS[5] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[5] + EMA_BTN_VISIBLE_X_MIN_AFTER_EMA * 60 * 1000)
+        else if (EMAActivity.EMA_NOTIF_MILLIS[5] <= t && t <= EMAActivity.EMA_NOTIF_MILLIS[5] + EMA_RESPONSE_EXPIRE_TIME * 1000)
             ema_order = 6;
 
         return ema_order;
