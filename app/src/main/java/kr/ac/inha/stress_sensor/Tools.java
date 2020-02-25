@@ -51,6 +51,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -132,7 +133,7 @@ public class Tools {
         if (sb.length() > 0) {
             if (Tools.isNetworkAvailable(con))
                 Tools.execute(new FromServiceRunnable(
-                        con.getString(R.string.url_usage_stats, con.getString(R.string.server_ip)),
+                        con.getString(R.string.url_usage_stats, con.getString(R.string.server_ip) + ":" + con.getString(R.string.server_port)),
                         loginPrefs.getString(SignInActivity.user_id, null),
                         loginPrefs.getString(SignInActivity.password, null),
                         sb.toString()
@@ -372,7 +373,7 @@ public class Tools {
         activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
-    public static boolean isNetworkAvailable(Context context) {
+    public static boolean isNetworkAvailable(final Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo;
         if (connectivityManager == null)
@@ -494,7 +495,7 @@ public class Tools {
         if (Tools.isNetworkAvailable(con)) {
 
             Tools.execute(new FromServiceRunnable(
-                    con.getString(R.string.url_heartbeat, con.getString(R.string.server_ip)),
+                    con.getString(R.string.url_heartbeat, con.getString(R.string.server_ip) + ":" + con.getString(R.string.server_port)),
                     loginPrefs.getString(SignInActivity.user_id, null),
                     loginPrefs.getString(SignInActivity.password, null)
 

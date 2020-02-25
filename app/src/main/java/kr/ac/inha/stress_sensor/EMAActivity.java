@@ -128,7 +128,7 @@ public class EMAActivity extends AppCompatActivity {
         if (Tools.isNetworkAvailable(this))
             Tools.execute(new MyRunnable(
                     this,
-                    getString(R.string.url_ema_submit, getString(R.string.server_ip)),
+                    getString(R.string.url_ema_submit, getString(R.string.server_ip)+":"+getString(R.string.server_port)),
                     loginPrefs.getString(SignInActivity.user_id, null),
                     loginPrefs.getString(SignInActivity.password, null),
                     timestamp,
@@ -142,11 +142,11 @@ public class EMAActivity extends AppCompatActivity {
                     String url = (String) args[0];
                     String email = (String) args[1];
                     String password = (String) args[2];
-                    long timestamp = (long) args[3];
-                    int ans1 = (int) args[4];
-                    int ans2 = (int) args[5];
-                    int ans3 = (int) args[6];
-                    int ans4 = (int) args[7];
+                    final long timestamp = (long) args[3];
+                    final int ans1 = (int) args[4];
+                    final int ans2 = (int) args[5];
+                    final int ans3 = (int) args[6];
+                    final int ans4 = (int) args[7];
                     try {
                         JSONObject body = new JSONObject();
                         body.put("username", email);
@@ -168,6 +168,8 @@ public class EMAActivity extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         Toast.makeText(activity, "Submitted to Server", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(EMAActivity.this, MainActivity.class);
+                                        startActivity(intent);
                                         finish();
                                     }
                                 });
@@ -198,30 +200,17 @@ public class EMAActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(activity, "Failed to submit to server", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "Failed to submit to server (Server shut down)", Toast.LENGTH_SHORT).show();
+                                saveEMALocally(ans1, ans2, ans3, ans4, timestamp);
                             }
                         });
                     }
                     enableTouch();
+
                 }
             });
         else {
-            Log.d(TAG, "No connection case");
-            String answers = String.format(Locale.US, "%d %d %d %d",
-                    answer1,
-                    answer2,
-                    answer3,
-                    answer4);
-
-            boolean isInserted = db.insertEMAData(emaOrder, timestamp, answers);
-            if (isInserted) {
-                Toast.makeText(this, "Response saved", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            } else
-                Log.d(TAG, "Failed to save");
-
+            saveEMALocally(answer1, answer2, answer3, answer4, timestamp);
         }
 
         SharedPreferences.Editor editor = loginPrefs.edit();
@@ -231,10 +220,24 @@ public class EMAActivity extends AppCompatActivity {
         final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(EMA_NOTIFICATION_ID);
 
-        /*
-        SharedPreferences.Editor editor = Tools.loginPrefs.edit();
-        editor.putLong("ema_btn_set_visible", 0);
-        editor.putInt("ema_order", -1);
-        editor.apply();*/
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+        finish();
+
+    }
+
+    private void saveEMALocally(int answer1, int answer2, int answer3, int answer4, long timestamp) {
+        Log.d(TAG, "No connection case");
+        String answers = String.format(Locale.US, "%d %d %d %d",
+                answer1,
+                answer2,
+                answer3,
+                answer4);
+
+        boolean isInserted = db.insertEMAData(emaOrder, timestamp, answers);
+        if (isInserted) {
+            Toast.makeText(this, "Response saved", Toast.LENGTH_SHORT).show();
+        } else
+            Log.d(TAG, "Failed to save");
     }
 }

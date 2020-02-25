@@ -43,7 +43,7 @@ public class SignUpActivity extends Activity {
     public void userRegister(String name, String userID, String phone, String password) {
         Tools.execute(new MyRunnable(
                 this,
-                getString(R.string.url_user_register, getString(R.string.server_ip)),
+                getString(R.string.url_user_register, getString(R.string.server_ip) + ":" + getString(R.string.server_port)),
                 name,
                 userID,
                 phone,

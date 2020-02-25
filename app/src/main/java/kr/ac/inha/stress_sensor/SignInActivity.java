@@ -95,7 +95,7 @@ public class SignInActivity extends Activity {
         if (Tools.isNetworkAvailable(this))
             Tools.execute(new MyRunnable(
                     this,
-                    getString(R.string.url_user_login, getString(R.string.server_ip)),
+                    getString(R.string.url_user_login, getString(R.string.server_ip) + ":" + getString(R.string.server_port)),
                     userID.getText().toString(),
                     userPassword.getText().toString()
             ) {

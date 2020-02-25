@@ -67,7 +67,7 @@ public class ConnectionReceiver extends BroadcastReceiver {
     private void submitEMAData(short emaOrder, long timestamp, String answers) {
         final SharedPreferences loginPrefs = context.getSharedPreferences("UserLogin", MODE_PRIVATE);
         Tools.execute(new FromServiceRunnable(
-                context.getString(R.string.url_ema_submit, context.getString(R.string.server_ip)),
+                context.getString(R.string.url_ema_submit, context.getString(R.string.server_ip) + ":" + context.getString(R.string.server_port)),
                 loginPrefs.getString(SignInActivity.user_id, null),
                 loginPrefs.getString(SignInActivity.password, null),
                 emaOrder,

@@ -319,7 +319,7 @@ public class MainActivity extends Activity {
         if (Tools.isNetworkAvailable(this))
             Tools.execute(new MyRunnable(
                     this,
-                    getString(R.string.url_usr_stat, getString(R.string.server_ip)),
+                    getString(R.string.url_usr_stat, getString(R.string.server_ip) + ":" + getString(R.string.server_port)),
                     loginPrefs.getString(SignInActivity.user_id, null),
                     loginPrefs.getString(SignInActivity.password, null)
             ) {
@@ -463,7 +463,7 @@ public class MainActivity extends Activity {
                 @Override
                 public void run() {
                     try {
-                        Tools.postFiles(getString(R.string.url_audio_submit, getString(R.string.server_ip)), loginPrefs.getString(SignInActivity.user_id, null), loginPrefs.getString(SignInActivity.password, null), new File(audioRecorder.getPath()));
+                        Tools.postFiles(getString(R.string.url_audio_submit, getString(R.string.server_ip) + ":" + getString(R.string.server_port)), loginPrefs.getString(SignInActivity.user_id, null), loginPrefs.getString(SignInActivity.password, null), new File(audioRecorder.getPath()));
                     } catch (IOException e) {
                         e.printStackTrace();
                         Log.e(TAG, String.format(Locale.getDefault(), "Couldn't process audio file %s", audioRecorder.getPath()));
@@ -546,7 +546,7 @@ public class MainActivity extends Activity {
         if (Tools.isNetworkAvailable(this))
             Tools.execute(new MyRunnable(
                     this,
-                    getString(R.string.url_sensor_data_submit, getString(R.string.server_ip)),
+                    getString(R.string.url_sensor_data_submit, getString(R.string.server_ip) + ":" + getString(R.string.server_port)),
                     loginPrefs.getString(SignInActivity.user_id, null),
                     loginPrefs.getString(SignInActivity.password, null),
                     file

@@ -86,7 +86,7 @@ public class GeofenceReceiver extends BroadcastReceiver {
         final SharedPreferences loginPrefs = con.getSharedPreferences("UserLogin", MODE_PRIVATE);
         if (Tools.isNetworkAvailable(con))
             Tools.execute(new FromServiceRunnable(
-                    con.getString(R.string.url_location_submit, con.getString(R.string.server_ip)),
+                    con.getString(R.string.url_location_submit, con.getString(R.string.server_ip) + ":" + con.getString(R.string.server_port)),
                     loginPrefs.getString(SignInActivity.user_id, null),
                     loginPrefs.getString(SignInActivity.password, null),
                     locationsObjArray

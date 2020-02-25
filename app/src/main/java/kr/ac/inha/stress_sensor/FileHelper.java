@@ -47,7 +47,7 @@ public class FileHelper {
                 String fPath = context.getFilesDir() + "/" + "sp_" + fileNamesInLong.get(n) + ".csv";
                 File file = new File(fPath);
 
-                String url = context.getString(R.string.url_sensor_data_submit, context.getString(R.string.server_ip));
+                String url = context.getString(R.string.url_sensor_data_submit, context.getString(R.string.server_ip) + ":" + context.getString(R.string.server_port));
                 String email = loginPrefs.getString(SignInActivity.user_id, null);
                 String password = loginPrefs.getString(SignInActivity.password, null);
 
